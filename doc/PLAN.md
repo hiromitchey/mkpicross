@@ -14,6 +14,7 @@
   - lint: `docker compose -f compose.dev.yaml run --rm web pnpm --filter web lint`
   - 停止: `docker compose -f compose.dev.yaml down`
 - 署名鍵と作者パスワードは `apps/web/.env.local`（Git 対象外）
+- リポジトリ: https://github.com/hiromitchey/mkpicross （`main` を SSH でプッシュ。`gh` は未導入）
 
 ## いま動くもの
 
@@ -49,4 +50,3 @@
 
 - 切り抜き枠を動かしても手修正は残る（位置がずれて見える）。「手修正を消す」で消せる
 - 開発モードで `/play/[id]` を開くと、`params` を `<Suspense>` の外で読んでいる旨のエラーがサーバーログに出る（表示とプレイは可能。本番ビルドは成功）
-- GitHub へのプッシュは、リポジトリを作ってから（ローカルの git は初期化済み。`gh` は未導入、SSH は接続可）
