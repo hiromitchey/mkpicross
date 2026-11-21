@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ピクロス: 満たしたヒントの色、クリア時のリビール */
+:root {
+  --hint-done: #b0b0b0;
+}
+@keyframes reveal {
+  from { opacity: 0; filter: blur(6px); }
+  to { opacity: 1; filter: none; }
+}
+/* 「おめでとう」が引いてから、元の絵がじわっと浮かび上がる */
+.reveal {
+  animation: reveal 3s ease-out 1.6s both;
+}
+
+/* クリア演出 */
+@keyframes congrats {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  25% { transform: translate(-50%, -50%) scale(1); }
+  70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.05); }
+}
+.congrats {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 0.4em 0.9em;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #e0457b;
+  font-size: clamp(1.6rem, 6vw, 3rem);
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  animation: congrats 2.4s ease-out both;
+}
+@keyframes confetti {
+  0% { opacity: 0; transform: translateY(-10%) rotate(0deg); }
+  10% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(110%) rotate(540deg); }
+}
+.confetti {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  font-size: clamp(1rem, 3vw, 1.6rem);
+  animation: confetti 2.6s ease-in both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .congrats, .confetti { animation-duration: 0.01s; animation-delay: 0s; }
+  .confetti { display: none; }
+}

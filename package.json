@@ -1,0 +1,14 @@
+{
+  "name": "picross",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "start": "pnpm --filter web start",
+    "test": "pnpm --filter @picross/core test",
+    "typecheck": "pnpm --filter @picross/core typecheck",
+    "db:generate": "pnpm --filter web exec drizzle-kit generate",
+    "db:migrate": "pnpm --filter web exec drizzle-kit migrate"
+  }
+}

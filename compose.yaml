@@ -1,0 +1,69 @@
+# VPS 用。Traefik は既存のものを使う前提（ネットワーク名・entrypoint・certresolver は既存設定に合わせる）
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://picross:${POSTGRES_PASSWORD}@db:5432/picross
+      STORAGE_DIR: /data/images
+    volumes:
+      - images:/data/images
+    depends_on:
+      - db
+    networks: [default, traefik]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.services.picross.loadbalancer.server.port=3000
+      # 通常のルート
+      - traefik.http.routers.picross.rule=Host(`picross.example.com`)
+      - traefik.http.routers.picross.entrypoints=websecure
+      - traefik.http.routers.picross.tls.certresolver=le
+      # 判定・ヒント・通報API: 1秒あたり平均5回まで
+      - traefik.http.routers.picross-api.rule=Host(`picross.example.com`) && PathRegexp(`^/api/puzzles/[^/]+/(verify|hint|check|report)$`)
+      - traefik.http.routers.picross-api.entrypoints=websecure
+      - traefik.http.routers.picross-api.tls.certresolver=le
+      - traefik.http.routers.picross-api.service=picross
+      - traefik.http.routers.picross-api.middlewares=picross-api-limit
+      - traefik.http.middlewares.picross-api-limit.ratelimit.average=5
+      - traefik.http.middlewares.picross-api-limit.ratelimit.burst=10
+      # ログイン: 1分あたり平均5回まで
+      - traefik.http.routers.picross-login.rule=Host(`picross.example.com`) && Path(`/api/author/login`)
+      - traefik.http.routers.picross-login.entrypoints=websecure
+      - traefik.http.routers.picross-login.tls.certresolver=le
+      - traefik.http.routers.picross-login.service=picross
+      - traefik.http.routers.picross-login.middlewares=picross-login-limit
+      - traefik.http.middlewares.picross-login-limit.ratelimit.average=5
+      - traefik.http.middlewares.picross-login-limit.ratelimit.period=1m
+      - traefik.http.middlewares.picross-login-limit.ratelimit.burst=5
+
+  # マイグレーション用（docker compose run --rm migrate）
+  migrate:
+    build:
+      context: .
+      target: build
+    profiles: [tools]
+    environment:
+      DATABASE_URL: postgres://picross:${POSTGRES_PASSWORD}@db:5432/picross
+    command: pnpm --filter web exec drizzle-kit migrate
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: picross
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: picross
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  images:
+  pgdata:
+
+networks:
+  traefik:
+    external: true
